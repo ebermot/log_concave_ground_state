@@ -95,7 +95,7 @@ def compute_eigenstates(ham: qt.Qobj, final_gs_states: List[qt.Qobj], is_final: 
         gs_energy = values[0]
         fs_energy = values[1]
         gap = fs_energy - gs_energy
-        state_vector = states[0].data.to_array().reshape(states[0].shape[0])
+        state_vector = states[0].data.toarray().reshape(states[0].shape[0])
         
         # Compute overlaps
         overlaps_G0 = sum(np.abs(final_gs.overlap(states[0]))**2 for final_gs in final_gs_states)
@@ -113,7 +113,7 @@ def compute_eigenstates(ham: qt.Qobj, final_gs_states: List[qt.Qobj], is_final: 
         
         gap = 0 if len(gs_vectors) > 1 else fs_value - gs_value
         uniform_gs = sum(gs_vectors).unit()
-        state_vector = uniform_gs.data.to_array().reshape(states[0].shape[0])
+        state_vector = uniform_gs.data.toarray().reshape(states[0].shape[0])
         
         # Compute overlaps
         overlaps_G0 = sum(np.abs(final_gs.overlap(vec))**2 for final_gs in final_gs_states for vec in gs_vectors)
