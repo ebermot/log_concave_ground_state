@@ -497,3 +497,22 @@ def create_perturbed_bitstring_function(base_func: Callable, perturbation_func: 
         hw = hamming_weight(x)
         return base_func(x, args) + perturbation_func(hw, args)
     return perturbed_bitstring_func
+
+
+def is_log_concave(p: np.ndarray) -> bool:
+    """Check if a probability distribution is log-concave.
+
+    Args:
+        p (np.ndarray): A 1D array representing a probability distribution.
+
+    Returns:
+        bool: True if the distribution is log-concave, False otherwise.
+    """
+    if len(p) < 3:
+        return True  # A distribution of length <3 is trivially log-concave
+
+    for i in range(1, len(p) - 1):
+        if p[i] ** 2 < p[i - 1] * p[i + 1]:
+            return False  # Found a violation of log-concavity
+
+    return True  # No violations found
