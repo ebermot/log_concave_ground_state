@@ -276,7 +276,8 @@ def plot_ground_state(amp: np.ndarray, n: int, problem: str,
     """
     if prob:
         amp = np.abs(amp) ** 2
-    
+    else:
+        amp = np.abs(amp)
     title = rf'Ground state for n={n}'
     if sim_params:
         param_str = ', '.join([f'{k}={v}' for k, v in sim_params.items()])
@@ -508,11 +509,13 @@ def is_log_concave(p: np.ndarray) -> bool:
     Returns:
         bool: True if the distribution is log-concave, False otherwise.
     """
+    p=np.asarray(p)
+    p=np.abs(p)
     if len(p) < 3:
         return True  # A distribution of length <3 is trivially log-concave
 
     for i in range(1, len(p) - 1):
         if p[i] ** 2 < p[i - 1] * p[i + 1]:
-            return False  # Found a violation of log-concavity
+            return (False, i)  # Found a violation of log-concavity
 
     return True  # No violations found
