@@ -23,7 +23,7 @@ def h0(n: int) -> qt.Qobj:
     """
     return -sum(sigx(n))
 
-def h0_bipartite(n: int) -> qt.Qobj:
+def h0_bipartite(n: int, args: Dict) -> qt.Qobj:
     """Construct the initial transverse field Hamiltonian for quantum annealing for bipartite systems.
     
     Args:
@@ -32,8 +32,17 @@ def h0_bipartite(n: int) -> qt.Qobj:
     Returns:
         Initial bipartite Hamiltonian
     """
-    identity_tensor = qt.tensor([qt.qeye(2)]*n)
-    return qt.tensor(identity_tensor, h0(n)) + qt.tensor(h0(n), identity_tensor)
+    balanced=args['balanced']
+    if balanced:
+        nL=nR=n
+        gamma=1
+    else:
+        nL=n
+        gamma=args['gamma']
+        nR=int(gamma*nL)
+    identity_tensor_L = qt.tensor([qt.qeye(2)]*nL)
+    identity_tensor_R = qt.tensor([qt.qeye(2)]*nR)
+    return qt.tensor(identity_tensor_L, h0(nR)) + qt.tensor(h0(nL), identity_tensor_R)
 
 def h0_hw(n: int) -> qt.Qobj:
     """Construct the initial transverse field Hamiltonian in Hamming weight basis.
@@ -50,7 +59,7 @@ def h0_hw(n: int) -> qt.Qobj:
         mat[d, d+1] = mat[d+1, d] = -a_d
     return qt.Qobj(mat, dims=[[n+1], [n+1]])
 
-def h0_bipartite_hw(n: int) -> qt.Qobj:
+def h0_bipartite_hw(n: int, args: Dict) -> qt.Qobj:
     """Construct the initial transverse field Hamiltonian for bipartite systems in Hamming weight basis.
     
     Args:
@@ -59,7 +68,17 @@ def h0_bipartite_hw(n: int) -> qt.Qobj:
     Returns:
         Initial bipartite Hamiltonian in Hamming weight basis
     """
-    return qt.tensor(qt.qeye(n+1), h0_hw(n)) + qt.tensor(h0_hw(n), qt.qeye(n+1))
+    balanced=args['balanced']
+    if balanced:
+        nL=nR=n
+        gamma=1
+    else:
+        nL=n
+        gamma=args['gamma']
+        nR=int(gamma*nL)
+    identity_tensor_L = qt.qeye(nL+1)
+    identity_tensor_R = qt.qeye(nR+1)
+    return qt.tensor(identity_tensor_L, h0_hw(nR)) + qt.tensor(h0_hw(nL), identity_tensor_R)
 
 # --- Problem Hamiltonians ---
 
@@ -194,7 +213,7 @@ def hs_bipartite_annealing(t: float, f: Callable, args: Dict) -> qt.Qobj:
         Bipartite annealing Hamiltonian at time t
     """
     n = args['n']
-    return (1-t)*h0_bipartite(n) + t*h1_bipartite(f, args)
+    return (1-t)*h0_bipartite(n, args) + t*h1_bipartite(f, args)
 
 def hs_bipartite_hw_annealing(t: float, f: Callable, args: Dict) -> qt.Qobj:
     """Construct the annealing schedule Hamiltonian for bipartite systems in Hamming weight basis.
@@ -208,5 +227,5 @@ def hs_bipartite_hw_annealing(t: float, f: Callable, args: Dict) -> qt.Qobj:
         Annealing Hamiltonian for bipartite systems in Hamming weight basis at time t
     """
     n = args['n']
-    return (1-t)*h0_bipartite_hw(n) + t*h1_bipartite_hw(f, args)
+    return (1-t)*h0_bipartite_hw(n, args) + t*h1_bipartite_hw(f, args)
 
